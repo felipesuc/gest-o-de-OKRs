@@ -219,6 +219,8 @@ table.grid tr.child-row td:first-child{padding-left:34px}
 .tela-tab.special:first-of-type{border-left:1px solid var(--line);border-radius:0 8px 0 0;margin-left:6px}
 .tela-tab.special.active{color:var(--ink);border-bottom-color:var(--gold)}
 .card-ctx{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px}
+.td-okr{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem;color:var(--ink-soft)}
+.mono-key{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;color:var(--gold);letter-spacing:.04em}
 .ctx-chip{font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.03em;color:var(--ink-soft);background:var(--bg-soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ctx-chip.tela{color:var(--ink);background:var(--line-soft);border-color:var(--line)}
 .ctx-chip.gold{color:var(--ink);background:var(--gold-soft);border-color:var(--gold)}
@@ -465,6 +467,16 @@ function krLabelOf(krId){
     for(let i = 0; i < t.okrs.length; i++){
       const j = t.okrs[i].krs.findIndex(k => k.id === krId);
       if(j >= 0) return `O${i+1}·KR${j+1}`;
+    }
+  }
+  return null;
+}
+function krInfoOf(krId){
+  if(!krId) return null;
+  for(const t of S.telas){
+    for(let i = 0; i < t.okrs.length; i++){
+      const j = t.okrs[i].krs.findIndex(k => k.id === krId);
+      if(j >= 0) return { objLabel:`O${i+1}`, objetivo:t.okrs[i].objetivo, krLabel:`KR${j+1}`, krTexto:t.okrs[i].krs[j].texto };
     }
   }
   return null;
@@ -845,8 +857,11 @@ function renderTabela(){
   let rows = filteredCards();
   rows.sort((a,b) => {
     let va, vb;
+    const ka = krInfoOf(a.krId), kb = krInfoOf(b.krId);
     switch(sortKey){
       case 'tela': va = telaNameOf(cardTelaId.get(a.id)); vb = telaNameOf(cardTelaId.get(b.id)); break;
+      case 'objetivo': va = ka ? ka.objetivo : '\uffff'; vb = kb ? kb.objetivo : '\uffff'; break;
+      case 'kr': va = ka ? ka.objLabel+ka.krLabel : '\uffff'; vb = kb ? kb.objLabel+kb.krLabel : '\uffff'; break;
       case 'raia': va = raiaName(a.raiaId); vb = raiaName(b.raiaId); break;
       case 'coluna': va = COLS.findIndex(c=>c.id===a.coluna); vb = COLS.findIndex(c=>c.id===b.coluna); break;
       case 'farol': va = farolOrder[a.farol]; vb = farolOrder[b.farol]; break;
@@ -857,11 +872,20 @@ function renderTabela(){
     return 0;
   });
   const arrow = k => sortKey === k ? (sortAsc ? ' ↑' : ' ↓') : '';
+  const okrCell = c => {
+    const info = krInfoOf(c.krId);
+    return `
+      <td class="td-okr" title="${info ? esc(info.objLabel+' — '+info.objetivo) : ''}">${info ? `<span class="mono-key">${info.objLabel}</span> ${esc(info.objetivo)}` : '—'}</td>
+      <td class="td-okr" title="${info ? esc(info.krLabel+' — '+info.krTexto) : ''}">${info ? `<span class="mono-key">${info.krLabel}</span> ${esc(info.krTexto)}` : '—'}</td>`;
+  };
   return `<div class="table-wrap"><table class="grid">
     <thead><tr>
-      <th onclick="setSort('titulo')">Entrega${arrow('titulo')}</th>
-      ${ctrl ? `<th onclick="setSort('tela')">Tela${arrow('tela')}</th>` : ''}
+      ${ctrl ? `
+      <th onclick="setSort('tela')">Tela${arrow('tela')}</th>
+      <th onclick="setSort('objetivo')">Objetivo${arrow('objetivo')}</th>
+      <th onclick="setSort('kr')">KR${arrow('kr')}</th>` : ''}
       <th onclick="setSort('raia')">Raia${arrow('raia')}</th>
+      <th onclick="setSort('titulo')">Entrega${arrow('titulo')}</th>
       <th onclick="setSort('coluna')">Coluna${arrow('coluna')}</th>
       <th onclick="setSort('farol')">Farol${arrow('farol')}</th>
       <th onclick="setSort('status')">Status${arrow('status')}</th>
@@ -870,11 +894,11 @@ function renderTabela(){
     </tr></thead>
     <tbody>
       ${rows.map(c => `<tr class="row ${c.parentId?'child-row':''}" onclick="openCardModal('${c.id}')">
+        ${ctrl ? `<td>${esc(telaNameOf(cardTelaId.get(c.id)))}</td>${okrCell(c)}` : ''}
+        <td>${esc(raiaName(c.raiaId))}</td>
         <td class="td-title">${c.parentId ? '↳ ' : ''}${esc(c.titulo)}
           ${c.parentId ? `<small>filho de: ${esc(parentTitle(c.parentId))}</small>` : children(c.id).length ? `<small>${children(c.id).length} card(s) filho(s)</small>` : ''}
         </td>
-        ${ctrl ? `<td>${esc(telaNameOf(cardTelaId.get(c.id)))}</td>` : ''}
-        <td>${esc(raiaName(c.raiaId))}</td>
         <td>${colName(c.coluna)}</td>
         <td><span class="farol-cell"><span class="farol ${c.farol}"></span>${c.farol}</span></td>
         <td><span class="chip ${statusClass(c.status)}">${esc(c.status)}</span></td>

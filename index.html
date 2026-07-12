@@ -130,8 +130,18 @@ textarea{resize:vertical;min-height:72px}
 .raia-actions{display:flex;gap:4px;margin-top:2px}
 .icon-btn{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink-faint);font-size:.82rem;border:1px solid transparent}
 .icon-btn:hover{background:var(--bg-soft);color:var(--ink);border-color:var(--line)}
-.cell{background:var(--bg-soft);border:1px dashed transparent;border-radius:var(--radius);padding:8px;display:flex;flex-direction:column;gap:8px;min-height:70px}
+.cell{background:var(--bg-soft);border:1px dashed transparent;border-radius:var(--radius);padding:8px;display:flex;flex-direction:column;gap:8px;min-height:70px;position:relative}
 .cell.dragover{border-color:var(--gold);background:var(--gold-soft)}
+.cell.scroll-limit{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--ink-faint) transparent}
+.cell-hidden-count{position:sticky;bottom:0;margin-top:auto;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-faint);background:linear-gradient(to bottom,transparent,var(--bg-soft) 45%);padding:10px 0 2px;pointer-events:none}
+
+/* ---------- Raia recolhida ---------- */
+.raia-toggle{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink-faint);font-size:.78rem;flex-shrink:0;transition:transform .15s ease}
+.raia-toggle:hover{background:var(--bg-soft);color:var(--ink)}
+.raia.collapsed .raia-toggle{transform:rotate(-90deg)}
+.raia.collapsed{padding:8px 0}
+.cell-collapsed{background:var(--bg-soft);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-faint);cursor:pointer;min-height:0}
+.cell-collapsed:hover{color:var(--ink);background:var(--gold-soft)}
 
 /* ---------- Card ---------- */
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;box-shadow:var(--shadow);cursor:grab;position:relative;transition:box-shadow .12s}
@@ -326,6 +336,34 @@ if(!S.calRef) S.calRef = new Date().toISOString().slice(0,7);
 let okrCollapsed = false;
 let expandedKids = new Set();
 
+/* ---- Raias recolhidas (preferência local, por navegador) ---- */
+let collapsedRaias = new Set();
+try{ collapsedRaias = new Set(JSON.parse(localStorage.getItem('okrflow_collapsed_v1')) || []) }catch(e){}
+function toggleRaia(id){
+  collapsedRaias.has(id) ? collapsedRaias.delete(id) : collapsedRaias.add(id);
+  try{ localStorage.setItem('okrflow_collapsed_v1', JSON.stringify([...collapsedRaias])) }catch(e){}
+  render();
+}
+
+/* ---- Limite de cards visíveis por célula (rolar para ver o resto) ---- */
+const CELL_CARD_LIMIT = 10;
+function applyCellLimits(){
+  document.querySelectorAll('.cell[data-raia]').forEach(cell => {
+    const cards = [...cell.children].filter(el => el.classList.contains('card'));
+    if(cards.length > CELL_CARD_LIMIT){
+      const cut = cards[CELL_CARD_LIMIT];
+      cell.classList.add('scroll-limit');
+      cell.style.maxHeight = Math.max(cut.offsetTop - 4, 140) + 'px';
+      if(!cell.querySelector('.cell-hidden-count')){
+        const tag = document.createElement('div');
+        tag.className = 'cell-hidden-count';
+        tag.textContent = `↓ +${cards.length - CELL_CARD_LIMIT} cards`;
+        cell.appendChild(tag);
+      }
+    }
+  });
+}
+
 function tela(){ return S.telas.find(t => t.id === S.activeTela) || S.telas[0]; }
 function save(){ store.set(S); }
 function commit(){ save(); render(); if(typeof scheduleCloud === 'function') scheduleCloud(); }
@@ -411,7 +449,7 @@ function render(){
   if(S.view === 'kanban') root.innerHTML = renderKanban();
   else if(S.view === 'tabela') root.innerHTML = renderTabela();
   else root.innerHTML = renderCalendario();
-  if(S.view === 'kanban') bindDnD();
+  if(S.view === 'kanban'){ bindDnD(); applyCellLimits(); }
 }
 
 function renderTelas(){
@@ -474,22 +512,28 @@ function renderKanban(){
       <div></div>
       ${COLS.map(c => `<div class="col-h" data-c="${c.id}">${c.nome}<span class="count">${colCount(c.id)}</span></div>`).join('')}
     </div>
-    ${t.raias.map(r => `
-      <div class="raia">
+    ${t.raias.map(r => { const closed = collapsedRaias.has(r.id); return `
+      <div class="raia ${closed?'collapsed':''}">
         <div class="raia-label">
-          <div class="raia-name">${esc(r.nome)}</div>
+          <div class="raia-name">
+            <button class="raia-toggle" title="${closed?'Expandir':'Recolher'} raia" onclick="toggleRaia('${r.id}')">▾</button>
+            ${esc(r.nome)}
+          </div>
           <div class="raia-meta">${t.cards.filter(c=>c.raiaId===r.id).length} cards</div>
           <div class="raia-actions">
             <button class="icon-btn" title="Renomear raia" onclick="openRaiaModal('${r.id}')">✎</button>
             <button class="icon-btn" title="Excluir raia" onclick="askDeleteRaia('${r.id}')">🗑</button>
           </div>
         </div>
-        ${COLS.map(c => `
+        ${closed
+          ? COLS.map(c => `
+          <div class="cell-collapsed" title="Expandir raia" onclick="toggleRaia('${r.id}')">${inCell(r.id, c.id).length} card(s)</div>`).join('')
+          : COLS.map(c => `
           <div class="cell" data-raia="${r.id}" data-col="${c.id}">
             ${inCell(r.id, c.id).map(cardHTML).join('')}
             <button class="cell-add" onclick="openCardModal(null,{raiaId:'${r.id}',coluna:'${c.id}'})">+ card</button>
           </div>`).join('')}
-      </div>`).join('')}
+      </div>`}).join('')}
     ${!t.raias.length ? '<div class="empty-note" style="padding:20px 6px">Crie uma raia para começar o quadro.</div>' : ''}
   </div></div>`;
 }

@@ -86,6 +86,20 @@ textarea{resize:vertical;min-height:72px}
 .filterbar input[type=search]{min-width:200px}
 .filter-count{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-soft);background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 .filter-count b{color:var(--ink)}
+/* multi-seleção */
+.msel{position:relative;min-width:130px}
+.msel-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:130px;padding:6px 9px;font-size:.84rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;cursor:pointer;text-align:left;white-space:nowrap}
+.msel-btn:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
+.msel-btn .caret{font-size:.6rem;color:var(--ink-faint)}
+.msel-btn .msel-n{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;color:var(--ink);background:var(--gold-soft);border:1px solid var(--gold);border-radius:999px;padding:1px 7px}
+.msel.open .msel-btn{border-color:var(--gold)}
+.msel-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:60;min-width:100%;max-height:240px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow-lg);padding:4px}
+.msel-item{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:.84rem;border-radius:6px;cursor:pointer;white-space:nowrap;user-select:none}
+.msel-item:hover{background:var(--bg-soft)}
+.msel-item input[type=checkbox]{width:14px;height:14px;min-width:14px;accent-color:var(--gold);margin:0;padding:0;cursor:pointer}
+.msel-item.checked{background:var(--gold-soft)}
+.msel-clear{display:block;width:100%;text-align:left;padding:6px 8px;font-size:.76rem;color:var(--ink-faint);border-top:1px solid var(--line-soft);margin-top:3px;cursor:pointer;border-radius:6px}
+.msel-clear:hover{background:var(--bg-soft);color:var(--ink)}
 .card-parent-ref{font-size:.68rem;color:var(--ink-faint);margin-bottom:4px;font-family:'IBM Plex Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:760px){.filterbar{padding:0 14px 14px}}
 
@@ -376,7 +390,8 @@ const children = pid => tela().cards.filter(c => c.parentId === pid);
 const cardById = id => tela().cards.find(c => c.id === id);
 
 /* ================= Filtros ================= */
-let F = { q:'', tipo:'todos', farol:'', status:'', kr:'', raia:'' };
+let F = { q:'', tipo:'todos', farol:[], status:[], kr:[], raia:[] };
+let openDrop = null;
 function cardType(c){ return children(c.id).length ? 'pai' : c.parentId ? 'filho' : 'simples'; }
 function matchFilter(c){
   if(F.q){
@@ -388,15 +403,52 @@ function matchFilter(c){
   if(F.tipo === 'filho' && cardType(c) !== 'filho') return false;
   if(F.tipo === 'paifilho' && cardType(c) === 'simples') return false;
   if(F.tipo === 'simples' && cardType(c) !== 'simples') return false;
-  if(F.farol && c.farol !== F.farol) return false;
-  if(F.status && c.status !== F.status) return false;
-  if(F.kr && c.krId !== F.kr) return false;
-  if(F.raia && c.raiaId !== F.raia) return false;
+  if(F.farol.length && !F.farol.includes(c.farol)) return false;
+  if(F.status.length && !F.status.includes(c.status)) return false;
+  if(F.kr.length && !F.kr.includes(c.krId)) return false;
+  if(F.raia.length && !F.raia.includes(c.raiaId)) return false;
   return true;
 }
 function filteredCards(){ return tela().cards.filter(matchFilter); }
 function setFilter(key, val){ F[key] = val; render(); }
-function clearFilters(){ F = { q:'', tipo:'todos', farol:'', status:'', kr:'', raia:'' }; render(); }
+function toggleFilterVal(key, val){
+  const i = F[key].indexOf(val);
+  i >= 0 ? F[key].splice(i, 1) : F[key].push(val);
+  render();
+}
+function clearFilterKey(key){ F[key] = []; render(); }
+function toggleDrop(key){ openDrop = openDrop === key ? null : key; renderFilters(); }
+document.addEventListener('click', e => {
+  if(openDrop && !e.target.closest('.msel') && document.getElementById('filterBar')){
+    openDrop = null; renderFilters();
+  }
+});
+function clearFilters(){ F = { q:'', tipo:'todos', farol:[], status:[], kr:[], raia:[] }; openDrop = null; render(); }
+function mselHTML(key, label, options){
+  const sel = F[key];
+  const summary = !sel.length ? 'Todos'
+    : sel.length === 1 ? esc((options.find(o => o.value === sel[0])||{}).label || sel[0])
+    : `${sel.length} selecionados`;
+  return `
+    <div class="f-field"><span>${label}</span>
+      <div class="msel ${openDrop===key?'open':''}" data-msel="${key}">
+        <button type="button" class="msel-btn" onclick="toggleDrop('${key}')">
+          <span>${summary}</span>
+          ${sel.length ? `<span class="msel-n">${sel.length}</span>` : ''}
+          <span class="caret">▾</span>
+        </button>
+        ${openDrop===key ? `<div class="msel-panel">
+          ${options.map(o => `
+            <label class="msel-item ${sel.includes(o.value)?'checked':''}" onclick="event.stopPropagation()">
+              <input type="checkbox" ${sel.includes(o.value)?'checked':''}
+                onchange="toggleFilterVal('${key}',${JSON.stringify(o.value).replace(/"/g,'&quot;')})">
+              ${esc(o.label)}
+            </label>`).join('')}
+          ${sel.length ? `<div class="msel-clear" onclick="clearFilterKey('${key}')">Limpar seleção</div>` : ''}
+        </div>` : ''}
+      </div>
+    </div>`;
+}
 function renderFilters(){
   const t = tela();
   const krOptions = t.okrs.flatMap((o,i) => o.krs.map((k,j) => ({id:k.id, label:`O${i+1}·KR${j+1}`})));
@@ -414,26 +466,10 @@ function renderFilters(){
         <option value="filho" ${F.tipo==='filho'?'selected':''}>Somente filhos</option>
         <option value="simples" ${F.tipo==='simples'?'selected':''}>Sem hierarquia</option>
       </select></div>
-    <div class="f-field"><span>Farol</span>
-      <select onchange="setFilter('farol',this.value)">
-        <option value="">Todos</option>
-        ${['verde','amarelo','vermelho'].map(f => `<option value="${f}" ${F.farol===f?'selected':''}>${f}</option>`).join('')}
-      </select></div>
-    <div class="f-field"><span>Status</span>
-      <select onchange="setFilter('status',this.value)">
-        <option value="">Todos</option>
-        ${STATUS.map(s => `<option ${F.status===s?'selected':''}>${s}</option>`).join('')}
-      </select></div>
-    <div class="f-field"><span>Raia</span>
-      <select onchange="setFilter('raia',this.value)">
-        <option value="">Todas</option>
-        ${t.raias.map(r => `<option value="${r.id}" ${F.raia===r.id?'selected':''}>${esc(r.nome)}</option>`).join('')}
-      </select></div>
-    <div class="f-field"><span>KR</span>
-      <select onchange="setFilter('kr',this.value)">
-        <option value="">Todos</option>
-        ${krOptions.map(k => `<option value="${k.id}" ${F.kr===k.id?'selected':''}>${k.label}</option>`).join('')}
-      </select></div>
+    ${mselHTML('farol', 'Farol', ['verde','amarelo','vermelho'].map(f => ({value:f, label:f})))}
+    ${mselHTML('status', 'Status', STATUS.map(s => ({value:s, label:s})))}
+    ${mselHTML('raia', 'Raia', t.raias.map(r => ({value:r.id, label:r.nome})))}
+    ${mselHTML('kr', 'KR', krOptions.map(k => ({value:k.id, label:k.label})))}
     <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Limpar</button>
     <span class="filter-count"><b>${shown}</b>/${total} cards</span>`;
 }

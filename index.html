@@ -128,15 +128,17 @@ textarea{resize:vertical;min-height:72px}
 
 /* ---------- Kanban ---------- */
 .board-wrap{padding:0 24px 40px;overflow-x:auto}
-.board{min-width:1080px}
-.col-headers{display:grid;grid-template-columns:190px repeat(4,1fr);gap:12px;background:#fff;padding:8px 0 10px}
+.board{min-width:1480px}
+.col-headers{display:grid;grid-template-columns:190px repeat(6,1fr);gap:12px;background:#fff;padding:8px 0 10px}
 .col-h{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);display:flex;align-items:center;gap:8px;padding:6px 10px;border-top:3px solid var(--line);background:var(--bg-soft);border-radius:0 0 6px 6px}
 .col-h .count{margin-left:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 8px;font-size:.7rem;color:var(--ink-faint)}
 .col-h[data-c="fila"]{border-top-color:#B7C1CF}
 .col-h[data-c="priorizado"]{border-top-color:var(--azul)}
 .col-h[data-c="fazendo"]{border-top-color:var(--gold)}
 .col-h[data-c="feito"]{border-top-color:var(--verde)}
-.raia{display:grid;grid-template-columns:190px repeat(4,1fr);gap:12px;border-top:1px solid var(--line);padding:14px 0}
+.col-h[data-c="descartado"]{border-top-color:#94A3B8}
+.col-h[data-c="cancelado"]{border-top-color:var(--vermelho)}
+.raia{display:grid;grid-template-columns:190px repeat(6,1fr);gap:12px;border-top:1px solid var(--line);padding:14px 0}
 .raia-label{display:flex;flex-direction:column;gap:6px;padding:4px 6px;position:relative;z-index:12;background:#fff}
 .raia-name{font-weight:700;font-size:.92rem;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
 .raia-name::before{content:"";width:4px;height:18px;background:var(--gold);border-radius:2px}
@@ -182,6 +184,8 @@ textarea{resize:vertical;min-height:72px}
 .chip.status-atrasado{background:var(--vermelho-bg);color:var(--vermelho)}
 .chip.status-bloqueado{background:#EDE9FE;color:#7C3AED}
 .chip.status-concluido{background:var(--azul-bg);color:var(--azul)}
+.chip.status-descartado{background:#F1F5F9;color:#64748B}
+.chip.status-cancelado{background:var(--vermelho-bg);color:var(--vermelho)}
 .card-title{font-size:.9rem;font-weight:600;line-height:1.3;margin-bottom:4px}
 .card-desc{font-size:.78rem;color:var(--ink-soft);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card-dates{display:flex;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--ink-faint);flex-wrap:wrap}
@@ -276,6 +280,8 @@ table.grid tr.child-row td:first-child{padding-left:34px}
 .cal-ev.st-atrasado{border-left-color:var(--vermelho)}
 .cal-ev.st-bloqueado{border-left-color:var(--ink)}
 .cal-ev.st-concluido{border-left-color:var(--verde)}
+.cal-ev.st-descartado{border-left-color:#94A3B8}
+.cal-ev.st-cancelado{border-left-color:var(--vermelho)}
 .cal-ev.done{text-decoration:line-through;color:var(--ink-faint)}
 .cal-ev span{overflow:hidden;text-overflow:ellipsis}
 .cal-legend .stbar{width:3px;height:12px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
@@ -365,9 +371,11 @@ const COLS = [
   {id:'fila', nome:'Fila'},
   {id:'priorizado', nome:'Priorizado'},
   {id:'fazendo', nome:'Fazendo'},
-  {id:'feito', nome:'Feito'}
+  {id:'feito', nome:'Feito'},
+  {id:'descartado', nome:'Descartado'},
+  {id:'cancelado', nome:'Cancelado'}
 ];
-const STATUS = ['No prazo','Em risco','Atrasado','Bloqueado','Concluído'];
+const STATUS = ['No prazo','Em risco','Atrasado','Bloqueado','Concluído','Descartado','Cancelado'];
 const statusClass = s => 'status-' + s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-');
 
 /* ================= Seed ================= */
@@ -444,7 +452,8 @@ function commit(){ save(); render(); if(typeof scheduleCloud === 'function') sch
 /* ================= Helpers ================= */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => { if(!d) return '—'; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y.slice(2)}`; };
-const isLate = c => c.dataPlanejada && !c.dataRealizada && c.status !== 'Concluído' && c.dataPlanejada < new Date().toISOString().slice(0,10);
+const isOut = c => c.coluna === 'descartado' || c.coluna === 'cancelado' || c.status === 'Descartado' || c.status === 'Cancelado';
+const isLate = c => c.dataPlanejada && !c.dataRealizada && c.status !== 'Concluído' && !isOut(c) && c.dataPlanejada < new Date().toISOString().slice(0,10);
 /* ---- Telas especiais: Controle Geral e Dashboard ---- */
 const CTRL_ID = '__controle__', DASH_ID = '__dashboard__';
 const isCtrl = () => S.activeTela === CTRL_ID;
@@ -613,7 +622,7 @@ function switchTela(id){ S.activeTela = id; commit(); }
 function toggleOkr(){ okrCollapsed = !okrCollapsed; document.getElementById('okrPanel').classList.toggle('collapsed', okrCollapsed); }
 function krProgress(krId, t){
   t = t || tela();
-  const linked = t.cards.filter(c => c.krId === krId);
+  const linked = t.cards.filter(c => c.krId === krId && !isOut(c));
   if(!linked.length) return null;
   const done = linked.filter(c => c.coluna === 'feito' || c.status === 'Concluído').length;
   return {done, total: linked.length, pct: Math.round(done/linked.length*100)};
@@ -721,7 +730,8 @@ function renderCtrlKanban(){
 
 function cardHTML(c){
   const kids = children(c.id);
-  const done = kids.filter(k => k.coluna === 'feito' || k.status === 'Concluído').length;
+  const kidsAtivos = kids.filter(k => !isOut(k));
+  const done = kidsAtivos.filter(k => k.coluna === 'feito' || k.status === 'Concluído').length;
   const open = expandedKids.has(c.id);
   const krLbl = c.krId ? krLabelOf(c.krId) : null;
   return `<div class="card" draggable="true" data-id="${c.id}" onclick="openCardModal('${c.id}')">
@@ -746,8 +756,8 @@ function cardHTML(c){
     ${kids.length ? `
       <div class="card-kids" onclick="event.stopPropagation()">
         <div class="kids-bar" onclick="toggleKids('${c.id}')">
-          <span>${open?'▾':'▸'} ${done}/${kids.length} filhos</span>
-          <span class="kr-bar" style="flex:1"><i style="width:${Math.round(done/kids.length*100)}%"></i></span>
+          <span>${open?'▾':'▸'} ${done}/${kidsAtivos.length} filhos</span>
+          <span class="kr-bar" style="flex:1"><i style="width:${kidsAtivos.length ? Math.round(done/kidsAtivos.length*100) : 0}%"></i></span>
         </div>
         ${open ? `<div class="kids-list">
           ${kids.map(k => `<div class="kid-row" onclick="openCardModal('${k.id}')">
@@ -787,6 +797,8 @@ function bindDnD(){
         children(c.id).forEach(k => { k.raiaId = c.raiaId; });
       }
       if(c.coluna === 'feito' && !c.dataRealizada){ c.dataRealizada = new Date().toISOString().slice(0,10); c.status = 'Concluído'; }
+      if(c.coluna === 'descartado'){ c.status = 'Descartado'; }
+      if(c.coluna === 'cancelado'){ c.status = 'Cancelado'; }
       commit();
     });
   });
@@ -936,7 +948,7 @@ function renderCalendario(){
   let padN = 1;
   cells.forEach(c => { if(c.pad) c.d = padN++; });
   const evs = iso => filteredCards().filter(c => c.dataPlanejada === iso);
-  const stClass = { 'No prazo':'st-prazo', 'Em risco':'st-risco', 'Atrasado':'st-atrasado', 'Bloqueado':'st-bloqueado', 'Concluído':'st-concluido' };
+  const stClass = { 'No prazo':'st-prazo', 'Em risco':'st-risco', 'Atrasado':'st-atrasado', 'Bloqueado':'st-bloqueado', 'Concluído':'st-concluido', 'Descartado':'st-descartado', 'Cancelado':'st-cancelado' };
   return `<div class="cal-wrap">
     <div class="cal-nav">
       <button class="btn btn-ghost btn-sm" onclick="calMove(-1)">←</button>
@@ -957,7 +969,7 @@ function renderCalendario(){
         <div class="cal-day ${c.other?'other':''} ${c.iso===todayStr?'today':''}">
           <span class="dnum">${c.d}</span>
           ${c.iso ? evs(c.iso).map(ev => `
-            <div class="cal-ev ${stClass[ev.status]||''} ${ev.status==='Concluído'?'done':''}" onclick="openCardModal('${ev.id}')" title="${esc(ev.titulo)} — ${esc(ev.status)}${isCtrl() ? ' · '+esc(telaNameOf(cardTelaId.get(ev.id)))+' · '+esc(raiaNameOf(ev.raiaId)) : ''}">
+            <div class="cal-ev ${stClass[ev.status]||''} ${['Concluído','Descartado','Cancelado'].includes(ev.status)?'done':''}" onclick="openCardModal('${ev.id}')" title="${esc(ev.titulo)} — ${esc(ev.status)}${isCtrl() ? ' · '+esc(telaNameOf(cardTelaId.get(ev.id)))+' · '+esc(raiaNameOf(ev.raiaId)) : ''}">
               <span class="farol ${ev.farol}"></span>${isCtrl() ? `<span class="cal-tela">${esc(telaNameOf(cardTelaId.get(ev.id)))}</span>` : ''}<span>${esc(ev.titulo)}</span>
             </div>`).join('') : ''}
         </div>`).join('')}
@@ -970,21 +982,22 @@ function renderDashboard(){
   const cards = allCards();
   const todayStr = new Date().toISOString().slice(0,10);
   const in7 = new Date(Date.now() + 7*864e5).toISOString().slice(0,10);
-  const isDone = c => c.coluna === 'feito' || c.status === 'Concluído';
+  const isDone = c => (c.coluna === 'feito' || c.status === 'Concluído') && !isOut(c);
   const total = cards.length;
+  const ativos = cards.filter(c => !isOut(c)).length;
   const done = cards.filter(isDone).length;
   const late = cards.filter(isLate);
   const blocked = cards.filter(c => c.status === 'Bloqueado');
   const risk = cards.filter(c => c.status === 'Em risco');
   const doing = cards.filter(c => c.coluna === 'fazendo').length;
-  const pct = total ? Math.round(done/total*100) : 0;
-  const next7 = cards.filter(c => c.dataPlanejada && !isDone(c) && c.dataPlanejada >= todayStr && c.dataPlanejada <= in7)
+  const pct = ativos ? Math.round(done/ativos*100) : 0;
+  const next7 = cards.filter(c => c.dataPlanejada && !isDone(c) && !isOut(c) && c.dataPlanejada >= todayStr && c.dataPlanejada <= in7)
     .sort((a,b) => a.dataPlanejada < b.dataPlanejada ? -1 : 1);
   const lateSorted = [...late].sort((a,b) => a.dataPlanejada < b.dataPlanejada ? -1 : 1);
 
   const bar = (n, max, color) => `<span class="dash-bar"><i style="width:${max ? Math.round(n/max*100) : 0}%;background:${color}"></i></span>`;
   const colMax = Math.max(...COLS.map(cl => cards.filter(c => c.coluna === cl.id).length), 1);
-  const stColors = {'No prazo':'var(--azul)','Em risco':'var(--amarelo)','Atrasado':'var(--vermelho)','Bloqueado':'var(--ink)','Concluído':'var(--verde)'};
+  const stColors = {'No prazo':'var(--azul)','Em risco':'var(--amarelo)','Atrasado':'var(--vermelho)','Bloqueado':'var(--ink)','Concluído':'var(--verde)','Descartado':'#94A3B8','Cancelado':'var(--vermelho)'};
   const stMax = Math.max(...STATUS.map(s => cards.filter(c => c.status === s).length), 1);
 
   const evItem = c => `
@@ -998,7 +1011,7 @@ function renderDashboard(){
   return `<div class="dash-wrap">
     <div class="kpi-grid">
       <div class="kpi"><small>Cards totais</small><b>${total}</b><span>${S.telas.length} telas</span></div>
-      <div class="kpi"><small>Concluídos</small><b>${done}</b><span>${pct}% do total</span></div>
+      <div class="kpi"><small>Concluídos</small><b>${done}</b><span>${pct}% dos ativos</span></div>
       <div class="kpi"><small>Em execução</small><b>${doing}</b><span>coluna Fazendo</span></div>
       <div class="kpi ${late.length?'alert':''}"><small>Atrasados</small><b>${late.length}</b><span>planejada vencida</span></div>
       <div class="kpi ${blocked.length?'alert':''}"><small>Bloqueados</small><b>${blocked.length}</b><span>impedimento ativo</span></div>
@@ -1024,7 +1037,7 @@ function renderDashboard(){
         <thead><tr><th>Tela</th><th>Cards</th><th>Concluídos</th><th>Atrasados</th><th>Bloqueados</th><th>Farol vermelho</th><th style="width:220px">Conclusão</th></tr></thead>
         <tbody>
           ${S.telas.map(t => {
-            const tc = t.cards, td = tc.filter(isDone).length, tp = tc.length ? Math.round(td/tc.length*100) : 0;
+            const tc = t.cards, ta = tc.filter(c => !isOut(c)).length, td = tc.filter(isDone).length, tp = ta ? Math.round(td/ta*100) : 0;
             const tl = tc.filter(isLate).length, tb = tc.filter(c=>c.status==='Bloqueado').length, tv = tc.filter(c=>c.farol==='vermelho').length;
             return `<tr class="row" onclick="switchTela('${t.id}')">
               <td class="td-title">${esc(t.nome)}</td>

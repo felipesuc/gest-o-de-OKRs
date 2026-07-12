@@ -152,6 +152,13 @@ textarea{resize:vertical;min-height:72px}
 /* ---------- Raia recolhida ---------- */
 .raia-toggle{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink-faint);font-size:.78rem;flex-shrink:0;transition:transform .15s ease}
 .raia-toggle:hover{background:var(--bg-soft);color:var(--ink)}
+/* ---------- Reordenar raias (drag) ---------- */
+.raia-grip{width:20px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink-faint);font-size:.9rem;flex-shrink:0;cursor:grab;user-select:none;letter-spacing:-2px}
+.raia-grip:hover{background:var(--bg-soft);color:var(--ink)}
+.raia-grip:active{cursor:grabbing}
+.raia.raia-dragging{opacity:.45}
+.raia.drop-above{box-shadow:inset 0 3px 0 var(--gold)}
+.raia.drop-below{box-shadow:inset 0 -3px 0 var(--gold)}
 .raia.collapsed .raia-toggle{transform:rotate(-90deg)}
 .raia.collapsed{padding:8px 0}
 .cell-collapsed{background:var(--bg-soft);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-faint);cursor:pointer;min-height:0}
@@ -206,6 +213,48 @@ table.grid tr.child-row td:first-child{padding-left:34px}
 .farol-cell{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--ink-soft)}
 
 /* ---------- Calendário ---------- */
+.cal-tela{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--ink-faint);flex-shrink:0;max-width:70px;overflow:hidden;text-overflow:ellipsis}
+/* ---------- Telas especiais (Controle / Dashboard) ---------- */
+.tela-tab.special{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.tela-tab.special:first-of-type{border-left:1px solid var(--line);border-radius:0 8px 0 0;margin-left:6px}
+.tela-tab.special.active{color:var(--ink);border-bottom-color:var(--gold)}
+.card-ctx{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px}
+.ctx-chip{font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.03em;color:var(--ink-soft);background:var(--bg-soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctx-chip.tela{color:var(--ink);background:var(--line-soft);border-color:var(--line)}
+.ctx-chip.gold{color:var(--ink);background:var(--gold-soft);border-color:var(--gold)}
+/* ---------- Dashboard ---------- */
+.dash-wrap{padding:0 24px 48px;display:flex;flex-direction:column;gap:16px}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow)}
+.kpi small{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+.kpi b{font-size:1.7rem;font-weight:700;letter-spacing:-.02em}
+.kpi span{font-size:.72rem;color:var(--ink-soft)}
+.kpi.alert{border-left:3px solid var(--vermelho)}
+.kpi.alert b{color:var(--vermelho)}
+.kpi.warn{border-left:3px solid var(--amarelo)}
+.dash-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.dash-card h4{font-size:.92rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.dash-count{font-size:.72rem;color:var(--ink-faint);background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.dash-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+.dash-lbl{font-size:.82rem;color:var(--ink-soft);min-width:90px}
+.dash-lbl.kr{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-bar{flex:1;height:8px;background:var(--line-soft);border-radius:4px;overflow:hidden}
+.dash-bar i{display:block;height:100%;border-radius:4px}
+.dash-n{font-size:.78rem;min-width:26px;text-align:right;color:var(--ink)}
+.dash-table th,.dash-table td{white-space:nowrap}
+.dash-okr-tela{border-top:1px solid var(--line-soft);padding:10px 0}
+.dash-okr-tela:first-of-type{border-top:none;padding-top:0}
+.dash-okr-tela-name{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:6px}
+.dash-okr-obj{font-size:.88rem;font-weight:600;margin:6px 0 4px;display:flex;gap:8px;align-items:baseline}
+.dash-okr-obj small{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--gold);letter-spacing:.08em}
+.dash-ev{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:.82rem}
+.dash-ev:hover{background:var(--bg-soft)}
+.dash-ev .farol{width:8px;height:8px;box-shadow:none;flex-shrink:0}
+.dash-ev-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.dash-ev-date{font-size:.72rem;color:var(--ink-soft)}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.dash-wrap{padding:0 14px 40px}.kpi-grid,.dash-cols{grid-template-columns:1fr}}
 .cal-wrap{padding:0 24px 40px}
 .cal-nav{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .cal-nav h3{font-size:1.05rem;font-weight:700;min-width:190px;text-align:center;text-transform:capitalize}
@@ -217,11 +266,17 @@ table.grid tr.child-row td:first-child{padding-left:34px}
 .cal-day .dnum{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--ink-faint);font-weight:600}
 .cal-day.other{background:var(--bg-soft)}
 .cal-day.today .dnum{background:var(--gold);color:var(--ink);border-radius:5px;padding:1px 6px;align-self:flex-start}
-.cal-ev{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:3px 6px;border-radius:5px;background:var(--bg-soft);border:1px solid var(--line);cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-ev{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:3px 6px;border-radius:5px;background:var(--bg-soft);border:1px solid var(--line);border-left:3px solid var(--line);cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .cal-ev:hover{background:var(--gold-soft)}
 .cal-ev .farol{width:7px;height:7px;box-shadow:none;flex-shrink:0}
+.cal-ev.st-prazo{border-left-color:var(--azul)}
+.cal-ev.st-risco{border-left-color:var(--amarelo)}
+.cal-ev.st-atrasado{border-left-color:var(--vermelho)}
+.cal-ev.st-bloqueado{border-left-color:var(--ink)}
+.cal-ev.st-concluido{border-left-color:var(--verde)}
 .cal-ev.done{text-decoration:line-through;color:var(--ink-faint)}
 .cal-ev span{overflow:hidden;text-overflow:ellipsis}
+.cal-legend .stbar{width:3px;height:12px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px}
 
 /* ---------- Modal ---------- */
 .overlay{position:fixed;inset:0;background:rgba(13,27,42,.45);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;z-index:100;overflow-y:auto}
@@ -265,9 +320,11 @@ table.grid tr.child-row td:first-child{padding-left:34px}
 <div class="subbar">
   <h1 class="tela-title" id="telaTitle"></h1>
   <div class="actions">
-    <button class="btn btn-primary btn-sm" onclick="openCardModal()">+ Card</button>
-    <button class="btn bt-sm btn-ghost btn-sm" onclick="openOkrModal()">+ OKR</button>
-    <button class="btn btn-ghost btn-sm" onclick="openRaiaModal()">+ Raia</button>
+    <span id="createBtns">
+      <button class="btn btn-primary btn-sm" onclick="openCardModal()">+ Card</button>
+      <button class="btn bt-sm btn-ghost btn-sm" onclick="openOkrModal()">+ OKR</button>
+      <button class="btn btn-ghost btn-sm" onclick="openRaiaModal()">+ Raia</button>
+    </span>
     <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Exportar</button>
     <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">Importar</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
@@ -362,7 +419,7 @@ function toggleRaia(id){
 /* ---- Limite de cards visíveis por célula (rolar para ver o resto) ---- */
 const CELL_CARD_LIMIT = 10;
 function applyCellLimits(){
-  document.querySelectorAll('.cell[data-raia]').forEach(cell => {
+  document.querySelectorAll('.cell[data-raia],.cell[data-tela]').forEach(cell => {
     const cards = [...cell.children].filter(el => el.classList.contains('card'));
     if(cards.length > CELL_CARD_LIMIT){
       const cut = cards[CELL_CARD_LIMIT];
@@ -386,11 +443,37 @@ function commit(){ save(); render(); if(typeof scheduleCloud === 'function') sch
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => { if(!d) return '—'; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y.slice(2)}`; };
 const isLate = c => c.dataPlanejada && !c.dataRealizada && c.status !== 'Concluído' && c.dataPlanejada < new Date().toISOString().slice(0,10);
-const children = pid => tela().cards.filter(c => c.parentId === pid);
-const cardById = id => tela().cards.find(c => c.id === id);
+/* ---- Telas especiais: Controle Geral e Dashboard ---- */
+const CTRL_ID = '__controle__', DASH_ID = '__dashboard__';
+const isCtrl = () => S.activeTela === CTRL_ID;
+const isDash = () => S.activeTela === DASH_ID;
+let cardTelaId = new Map();
+function allCards(){
+  cardTelaId = new Map();
+  const out = [];
+  S.telas.forEach(t => t.cards.forEach(c => { cardTelaId.set(c.id, t.id); out.push(c); }));
+  return out;
+}
+function telaOfCard(cardId){ return S.telas.find(t => t.cards.some(c => c.id === cardId)); }
+function telaNameOf(telaId){ return (S.telas.find(t => t.id === telaId) || {}).nome || '—'; }
+function raiaNameOf(raiaId){
+  for(const t of S.telas){ const r = t.raias.find(r => r.id === raiaId); if(r) return r.nome; }
+  return '—';
+}
+function krLabelOf(krId){
+  for(const t of S.telas){
+    for(let i = 0; i < t.okrs.length; i++){
+      const j = t.okrs[i].krs.findIndex(k => k.id === krId);
+      if(j >= 0) return `O${i+1}·KR${j+1}`;
+    }
+  }
+  return null;
+}
+const children = pid => ((telaOfCard(pid) || tela()).cards).filter(c => c.parentId === pid);
+const cardById = id => { for(const t of S.telas){ const c = t.cards.find(c => c.id === id); if(c) return c; } };
 
 /* ================= Filtros ================= */
-let F = { q:'', tipo:'todos', farol:[], status:[], kr:[], raia:[] };
+let F = { q:'', tipo:'todos', tela:[], farol:[], status:[], kr:[], raia:[] };
 let openDrop = null;
 function cardType(c){ return children(c.id).length ? 'pai' : c.parentId ? 'filho' : 'simples'; }
 function matchFilter(c){
@@ -403,13 +486,14 @@ function matchFilter(c){
   if(F.tipo === 'filho' && cardType(c) !== 'filho') return false;
   if(F.tipo === 'paifilho' && cardType(c) === 'simples') return false;
   if(F.tipo === 'simples' && cardType(c) !== 'simples') return false;
+  if(isCtrl() && F.tela.length && !F.tela.includes(cardTelaId.get(c.id))) return false;
   if(F.farol.length && !F.farol.includes(c.farol)) return false;
   if(F.status.length && !F.status.includes(c.status)) return false;
   if(F.kr.length && !F.kr.includes(c.krId)) return false;
   if(F.raia.length && !F.raia.includes(c.raiaId)) return false;
   return true;
 }
-function filteredCards(){ return tela().cards.filter(matchFilter); }
+function filteredCards(){ return (isCtrl() ? allCards() : tela().cards).filter(matchFilter); }
 function setFilter(key, val){ F[key] = val; render(); }
 function toggleFilterVal(key, val){
   const i = F[key].indexOf(val);
@@ -423,7 +507,7 @@ document.addEventListener('click', e => {
     openDrop = null; renderFilters();
   }
 });
-function clearFilters(){ F = { q:'', tipo:'todos', farol:[], status:[], kr:[], raia:[] }; openDrop = null; render(); }
+function clearFilters(){ F = { q:'', tipo:'todos', tela:[], farol:[], status:[], kr:[], raia:[] }; openDrop = null; render(); }
 function mselHTML(key, label, options){
   const sel = F[key];
   const summary = !sel.length ? 'Todos'
@@ -450,9 +534,15 @@ function mselHTML(key, label, options){
     </div>`;
 }
 function renderFilters(){
-  const t = tela();
-  const krOptions = t.okrs.flatMap((o,i) => o.krs.map((k,j) => ({id:k.id, label:`O${i+1}·KR${j+1}`})));
-  const total = t.cards.length, shown = filteredCards().length;
+  const ctrl = isCtrl();
+  const t = ctrl ? null : tela();
+  const krOptions = ctrl
+    ? S.telas.flatMap(tt => tt.okrs.flatMap((o,i) => o.krs.map((k,j) => ({id:k.id, label:`${tt.nome} · O${i+1}·KR${j+1}`}))))
+    : t.okrs.flatMap((o,i) => o.krs.map((k,j) => ({id:k.id, label:`O${i+1}·KR${j+1}`})));
+  const raiaOptions = ctrl
+    ? S.telas.flatMap(tt => tt.raias.map(r => ({value:r.id, label:`${tt.nome} · ${r.nome}`})))
+    : t.raias.map(r => ({value:r.id, label:r.nome}));
+  const total = ctrl ? allCards().length : t.cards.length, shown = filteredCards().length;
   document.getElementById('filterBar').innerHTML = `
     <div class="f-field"><span>Buscar</span>
       <input type="search" placeholder="Título, descrição ou pai…" value="${esc(F.q)}"
@@ -466,9 +556,10 @@ function renderFilters(){
         <option value="filho" ${F.tipo==='filho'?'selected':''}>Somente filhos</option>
         <option value="simples" ${F.tipo==='simples'?'selected':''}>Sem hierarquia</option>
       </select></div>
+    ${ctrl ? mselHTML('tela', 'Tela', S.telas.map(tt => ({value:tt.id, label:tt.nome}))) : ''}
     ${mselHTML('farol', 'Farol', ['verde','amarelo','vermelho'].map(f => ({value:f, label:f})))}
     ${mselHTML('status', 'Status', STATUS.map(s => ({value:s, label:s})))}
-    ${mselHTML('raia', 'Raia', t.raias.map(r => ({value:r.id, label:r.nome})))}
+    ${mselHTML('raia', 'Raia', raiaOptions)}
     ${mselHTML('kr', 'KR', krOptions.map(k => ({value:k.id, label:k.label})))}
     <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Limpar</button>
     <span class="filter-count"><b>${shown}</b>/${total} cards</span>`;
@@ -477,12 +568,18 @@ function renderFilters(){
 /* ================= Render raiz ================= */
 function render(){
   renderTelas();
-  renderFilters();
-  renderOkr();
-  document.getElementById('telaTitle').textContent = tela().nome;
+  const ctrl = isCtrl(), dash = isDash();
+  document.getElementById('filterBar').style.display = dash ? 'none' : '';
+  document.getElementById('okrPanel').style.display = (ctrl || dash) ? 'none' : '';
+  document.getElementById('viewSwitch').style.display = dash ? 'none' : '';
+  const cb = document.getElementById('createBtns'); if(cb) cb.style.display = (ctrl || dash) ? 'none' : '';
+  if(!dash) renderFilters();
+  if(!ctrl && !dash) renderOkr();
+  document.getElementById('telaTitle').textContent = dash ? 'Dashboard de Controle' : ctrl ? 'Controle Geral' : tela().nome;
   document.querySelectorAll('#viewSwitch button').forEach(b => b.classList.toggle('active', b.dataset.v === S.view));
   const root = document.getElementById('viewRoot');
-  if(S.view === 'kanban') root.innerHTML = renderKanban();
+  if(dash){ root.innerHTML = renderDashboard(); return; }
+  if(S.view === 'kanban') root.innerHTML = ctrl ? renderCtrlKanban() : renderKanban();
   else if(S.view === 'tabela') root.innerHTML = renderTabela();
   else root.innerHTML = renderCalendario();
   if(S.view === 'kanban'){ bindDnD(); applyCellLimits(); }
@@ -494,14 +591,17 @@ function renderTelas(){
     <button class="tela-tab ${t.id===S.activeTela?'active':''}" onclick="switchTela('${t.id}')">
       ${esc(t.nome)}
       <span class="x" onclick="event.stopPropagation();askDeleteTela('${t.id}')" title="Excluir tela">✕</span>
-    </button>`).join('');
+    </button>`).join('') + `
+    <button class="tela-tab special ${isCtrl()?'active':''}" onclick="switchTela('${CTRL_ID}')" title="Visão operacional integrada de todas as telas">Controle</button>
+    <button class="tela-tab special ${isDash()?'active':''}" onclick="switchTela('${DASH_ID}')" title="Monitoramento consolidado">Dashboard</button>`;
 }
 function switchTela(id){ S.activeTela = id; commit(); }
 
 /* ================= OKR ================= */
 function toggleOkr(){ okrCollapsed = !okrCollapsed; document.getElementById('okrPanel').classList.toggle('collapsed', okrCollapsed); }
-function krProgress(krId){
-  const linked = tela().cards.filter(c => c.krId === krId);
+function krProgress(krId, t){
+  t = t || tela();
+  const linked = t.cards.filter(c => c.krId === krId);
   if(!linked.length) return null;
   const done = linked.filter(c => c.coluna === 'feito' || c.status === 'Concluído').length;
   return {done, total: linked.length, pct: Math.round(done/linked.length*100)};
@@ -549,9 +649,10 @@ function renderKanban(){
       ${COLS.map(c => `<div class="col-h" data-c="${c.id}">${c.nome}<span class="count">${colCount(c.id)}</span></div>`).join('')}
     </div>
     ${t.raias.map(r => { const closed = collapsedRaias.has(r.id); return `
-      <div class="raia ${closed?'collapsed':''}">
+      <div class="raia ${closed?'collapsed':''}" data-raia-id="${r.id}">
         <div class="raia-label">
           <div class="raia-name">
+            <span class="raia-grip" draggable="true" title="Arrastar para reordenar" data-grip="${r.id}">⠿</span>
             <button class="raia-toggle" title="${closed?'Expandir':'Recolher'} raia" onclick="toggleRaia('${r.id}')">▾</button>
             ${esc(r.nome)}
           </div>
@@ -574,10 +675,43 @@ function renderKanban(){
   </div></div>`;
 }
 
+/* ================= Kanban de Controle (todas as telas) ================= */
+function renderCtrlKanban(){
+  const visible = filteredCards();
+  const inCell = (telaId, col) => visible.filter(c => cardTelaId.get(c.id) === telaId && c.coluna === col)
+    .sort((a,b) => (a.parentId?1:0) - (b.parentId?1:0));
+  const colCount = col => visible.filter(c => c.coluna === col).length;
+  return `<div class="board-wrap"><div class="board">
+    <div class="col-headers">
+      <div></div>
+      ${COLS.map(c => `<div class="col-h" data-c="${c.id}">${c.nome}<span class="count">${colCount(c.id)}</span></div>`).join('')}
+    </div>
+    ${S.telas.map(t => { const key = 'ctrl:'+t.id, closed = collapsedRaias.has(key); return `
+      <div class="raia ${closed?'collapsed':''}">
+        <div class="raia-label">
+          <div class="raia-name">
+            <button class="raia-toggle" title="${closed?'Expandir':'Recolher'} tela" onclick="toggleRaia('${key}')">▾</button>
+            ${esc(t.nome)}
+          </div>
+          <div class="raia-meta">${t.cards.length} cards · ${t.raias.length} raias</div>
+        </div>
+        ${closed
+          ? COLS.map(c => `
+          <div class="cell-collapsed" title="Expandir tela" onclick="toggleRaia('${key}')">${inCell(t.id, c.id).length} card(s)</div>`).join('')
+          : COLS.map(c => `
+          <div class="cell" data-tela="${t.id}" data-col="${c.id}">
+            ${inCell(t.id, c.id).map(cardHTML).join('')}
+          </div>`).join('')}
+      </div>`}).join('')}
+    ${!S.telas.length ? '<div class="empty-note" style="padding:20px 6px">Nenhuma tela criada ainda.</div>' : ''}
+  </div></div>`;
+}
+
 function cardHTML(c){
   const kids = children(c.id);
   const done = kids.filter(k => k.coluna === 'feito' || k.status === 'Concluído').length;
   const open = expandedKids.has(c.id);
+  const krLbl = c.krId ? krLabelOf(c.krId) : null;
   return `<div class="card" draggable="true" data-id="${c.id}" onclick="openCardModal('${c.id}')">
     <div class="card-top">
       <span class="farol ${c.farol}"></span>
@@ -585,6 +719,11 @@ function cardHTML(c){
       ${kids.length ? '<span class="chip pai">PAI</span>' : c.parentId ? '<span class="chip filho">filho</span>' : ''}
       <span class="chip ${statusClass(c.status)}" style="margin-left:auto">${esc(c.status)}</span>
     </div>
+    ${isCtrl() ? `<div class="card-ctx">
+      <span class="ctx-chip tela">${esc(telaNameOf(cardTelaId.get(c.id)))}</span>
+      <span class="ctx-chip">${esc(raiaNameOf(c.raiaId))}</span>
+      ${krLbl ? `<span class="ctx-chip gold">${esc(krLbl)}</span>` : ''}
+    </div>` : ''}
     ${c.parentId ? `<div class="card-parent-ref">↳ ${esc((cardById(c.parentId)||{}).titulo||'')}</div>` : ''}
     <div class="card-title">${esc(c.titulo)}</div>
     ${c.descricao ? `<div class="card-desc">${esc(c.descricao)}</div>` : ''}
@@ -610,6 +749,7 @@ function cardHTML(c){
 function toggleKids(id){ expandedKids.has(id) ? expandedKids.delete(id) : expandedKids.add(id); render(); }
 
 /* Drag & drop */
+let draggingRaiaId = null;
 function bindDnD(){
   document.querySelectorAll('.card[draggable]').forEach(el => {
     el.addEventListener('dragstart', e => {
@@ -620,17 +760,74 @@ function bindDnD(){
     el.addEventListener('dragend', () => el.classList.remove('dragging'));
   });
   document.querySelectorAll('.cell').forEach(cell => {
-    cell.addEventListener('dragover', e => { e.preventDefault(); cell.classList.add('dragover'); });
+    cell.addEventListener('dragover', e => { if(draggingRaiaId) return; e.preventDefault(); cell.classList.add('dragover'); });
     cell.addEventListener('dragleave', () => cell.classList.remove('dragover'));
     cell.addEventListener('drop', e => {
+      if(draggingRaiaId) return;
       e.preventDefault(); cell.classList.remove('dragover');
       const id = e.dataTransfer.getData('text/plain');
       const c = cardById(id);
       if(!c) return;
+      if(cell.dataset.tela && cell.dataset.tela !== cardTelaId.get(id)) return; // Controle: não move entre telas
       c.coluna = cell.dataset.col;
-      c.raiaId = cell.dataset.raia;
+      if(cell.dataset.raia){
+        c.raiaId = cell.dataset.raia;
+        children(c.id).forEach(k => { k.raiaId = c.raiaId; });
+      }
       if(c.coluna === 'feito' && !c.dataRealizada){ c.dataRealizada = new Date().toISOString().slice(0,10); c.status = 'Concluído'; }
-      children(c.id).forEach(k => { k.raiaId = c.raiaId; });
+      commit();
+    });
+  });
+  bindRaiaDnD();
+}
+
+/* Reordenar raias arrastando pela alça */
+function clearRaiaDropHints(){
+  document.querySelectorAll('.raia.drop-above,.raia.drop-below').forEach(el => el.classList.remove('drop-above','drop-below'));
+}
+function bindRaiaDnD(){
+  document.querySelectorAll('.raia-grip').forEach(grip => {
+    grip.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      draggingRaiaId = grip.dataset.grip;
+      e.dataTransfer.setData('text/plain', 'raia:' + draggingRaiaId);
+      e.dataTransfer.effectAllowed = 'move';
+      const row = grip.closest('.raia');
+      if(row) requestAnimationFrame(() => row.classList.add('raia-dragging'));
+    });
+    grip.addEventListener('dragend', () => {
+      draggingRaiaId = null;
+      clearRaiaDropHints();
+      document.querySelectorAll('.raia.raia-dragging').forEach(el => el.classList.remove('raia-dragging'));
+    });
+  });
+  document.querySelectorAll('.raia[data-raia-id]').forEach(row => {
+    row.addEventListener('dragover', e => {
+      if(!draggingRaiaId || row.dataset.raiaId === draggingRaiaId) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const rect = row.getBoundingClientRect();
+      const below = e.clientY > rect.top + rect.height / 2;
+      clearRaiaDropHints();
+      row.classList.add(below ? 'drop-below' : 'drop-above');
+    });
+    row.addEventListener('dragleave', e => {
+      if(!row.contains(e.relatedTarget)) row.classList.remove('drop-above','drop-below');
+    });
+    row.addEventListener('drop', e => {
+      if(!draggingRaiaId || row.dataset.raiaId === draggingRaiaId) return;
+      e.preventDefault();
+      const below = row.classList.contains('drop-below');
+      clearRaiaDropHints();
+      const t = tela();
+      const from = t.raias.findIndex(r => r.id === draggingRaiaId);
+      if(from < 0) return;
+      const [moved] = t.raias.splice(from, 1);
+      let to = t.raias.findIndex(r => r.id === row.dataset.raiaId);
+      if(to < 0){ t.raias.splice(from, 0, moved); return; }
+      if(below) to++;
+      t.raias.splice(to, 0, moved);
+      draggingRaiaId = null;
       commit();
     });
   });
@@ -640,8 +837,8 @@ function bindDnD(){
 let sortKey = 'titulo', sortAsc = true;
 function setSort(k){ if(sortKey === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = true; } render(); }
 function renderTabela(){
-  const t = tela();
-  const raiaName = id => (t.raias.find(r => r.id === id) || {}).nome || '—';
+  const ctrl = isCtrl();
+  const raiaName = id => raiaNameOf(id);
   const colName = id => (COLS.find(c => c.id === id) || {}).nome || id;
   const parentTitle = id => id ? (cardById(id) || {}).titulo || '' : '';
   const farolOrder = {vermelho:0, amarelo:1, verde:2};
@@ -649,6 +846,7 @@ function renderTabela(){
   rows.sort((a,b) => {
     let va, vb;
     switch(sortKey){
+      case 'tela': va = telaNameOf(cardTelaId.get(a.id)); vb = telaNameOf(cardTelaId.get(b.id)); break;
       case 'raia': va = raiaName(a.raiaId); vb = raiaName(b.raiaId); break;
       case 'coluna': va = COLS.findIndex(c=>c.id===a.coluna); vb = COLS.findIndex(c=>c.id===b.coluna); break;
       case 'farol': va = farolOrder[a.farol]; vb = farolOrder[b.farol]; break;
@@ -662,6 +860,7 @@ function renderTabela(){
   return `<div class="table-wrap"><table class="grid">
     <thead><tr>
       <th onclick="setSort('titulo')">Entrega${arrow('titulo')}</th>
+      ${ctrl ? `<th onclick="setSort('tela')">Tela${arrow('tela')}</th>` : ''}
       <th onclick="setSort('raia')">Raia${arrow('raia')}</th>
       <th onclick="setSort('coluna')">Coluna${arrow('coluna')}</th>
       <th onclick="setSort('farol')">Farol${arrow('farol')}</th>
@@ -674,6 +873,7 @@ function renderTabela(){
         <td class="td-title">${c.parentId ? '↳ ' : ''}${esc(c.titulo)}
           ${c.parentId ? `<small>filho de: ${esc(parentTitle(c.parentId))}</small>` : children(c.id).length ? `<small>${children(c.id).length} card(s) filho(s)</small>` : ''}
         </td>
+        ${ctrl ? `<td>${esc(telaNameOf(cardTelaId.get(c.id)))}</td>` : ''}
         <td>${esc(raiaName(c.raiaId))}</td>
         <td>${colName(c.coluna)}</td>
         <td><span class="farol-cell"><span class="farol ${c.farol}"></span>${c.farol}</span></td>
@@ -712,16 +912,19 @@ function renderCalendario(){
   let padN = 1;
   cells.forEach(c => { if(c.pad) c.d = padN++; });
   const evs = iso => filteredCards().filter(c => c.dataPlanejada === iso);
+  const stClass = { 'No prazo':'st-prazo', 'Em risco':'st-risco', 'Atrasado':'st-atrasado', 'Bloqueado':'st-bloqueado', 'Concluído':'st-concluido' };
   return `<div class="cal-wrap">
     <div class="cal-nav">
       <button class="btn btn-ghost btn-sm" onclick="calMove(-1)">←</button>
       <h3>${monthName}</h3>
       <button class="btn btn-ghost btn-sm" onclick="calMove(1)">→</button>
       <div class="cal-legend">
-        <span><span class="farol verde"></span> ok</span>
-        <span><span class="farol amarelo"></span> atenção</span>
-        <span><span class="farol vermelho"></span> crítico</span>
-        <span>riscado = realizado</span>
+        <span><span class="stbar" style="background:var(--azul)"></span>no prazo</span>
+        <span><span class="stbar" style="background:var(--amarelo)"></span>em risco</span>
+        <span><span class="stbar" style="background:var(--vermelho)"></span>atrasado</span>
+        <span><span class="stbar" style="background:var(--ink)"></span>bloqueado</span>
+        <span><span class="stbar" style="background:var(--verde)"></span>concluído</span>
+        <span>riscado = concluído</span>
       </div>
     </div>
     <div class="cal-grid">
@@ -730,10 +933,112 @@ function renderCalendario(){
         <div class="cal-day ${c.other?'other':''} ${c.iso===todayStr?'today':''}">
           <span class="dnum">${c.d}</span>
           ${c.iso ? evs(c.iso).map(ev => `
-            <div class="cal-ev ${ev.dataRealizada?'done':''}" onclick="openCardModal('${ev.id}')" title="${esc(ev.titulo)}">
-              <span class="farol ${ev.farol}"></span><span>${esc(ev.titulo)}</span>
+            <div class="cal-ev ${stClass[ev.status]||''} ${ev.status==='Concluído'?'done':''}" onclick="openCardModal('${ev.id}')" title="${esc(ev.titulo)} — ${esc(ev.status)}${isCtrl() ? ' · '+esc(telaNameOf(cardTelaId.get(ev.id)))+' · '+esc(raiaNameOf(ev.raiaId)) : ''}">
+              <span class="farol ${ev.farol}"></span>${isCtrl() ? `<span class="cal-tela">${esc(telaNameOf(cardTelaId.get(ev.id)))}</span>` : ''}<span>${esc(ev.titulo)}</span>
             </div>`).join('') : ''}
         </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ================= Dashboard de Controle ================= */
+function renderDashboard(){
+  const cards = allCards();
+  const todayStr = new Date().toISOString().slice(0,10);
+  const in7 = new Date(Date.now() + 7*864e5).toISOString().slice(0,10);
+  const isDone = c => c.coluna === 'feito' || c.status === 'Concluído';
+  const total = cards.length;
+  const done = cards.filter(isDone).length;
+  const late = cards.filter(isLate);
+  const blocked = cards.filter(c => c.status === 'Bloqueado');
+  const risk = cards.filter(c => c.status === 'Em risco');
+  const doing = cards.filter(c => c.coluna === 'fazendo').length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const next7 = cards.filter(c => c.dataPlanejada && !isDone(c) && c.dataPlanejada >= todayStr && c.dataPlanejada <= in7)
+    .sort((a,b) => a.dataPlanejada < b.dataPlanejada ? -1 : 1);
+  const lateSorted = [...late].sort((a,b) => a.dataPlanejada < b.dataPlanejada ? -1 : 1);
+
+  const bar = (n, max, color) => `<span class="dash-bar"><i style="width:${max ? Math.round(n/max*100) : 0}%;background:${color}"></i></span>`;
+  const colMax = Math.max(...COLS.map(cl => cards.filter(c => c.coluna === cl.id).length), 1);
+  const stColors = {'No prazo':'var(--azul)','Em risco':'var(--amarelo)','Atrasado':'var(--vermelho)','Bloqueado':'var(--ink)','Concluído':'var(--verde)'};
+  const stMax = Math.max(...STATUS.map(s => cards.filter(c => c.status === s).length), 1);
+
+  const evItem = c => `
+    <div class="dash-ev" onclick="openCardModal('${c.id}')">
+      <span class="farol ${c.farol}"></span>
+      <span class="dash-ev-title">${esc(c.titulo)}</span>
+      <span class="ctx-chip tela">${esc(telaNameOf(cardTelaId.get(c.id)))}</span>
+      <span class="mono dash-ev-date">${fmtDate(c.dataPlanejada)}</span>
+    </div>`;
+
+  return `<div class="dash-wrap">
+    <div class="kpi-grid">
+      <div class="kpi"><small>Cards totais</small><b>${total}</b><span>${S.telas.length} telas</span></div>
+      <div class="kpi"><small>Concluídos</small><b>${done}</b><span>${pct}% do total</span></div>
+      <div class="kpi"><small>Em execução</small><b>${doing}</b><span>coluna Fazendo</span></div>
+      <div class="kpi ${late.length?'alert':''}"><small>Atrasados</small><b>${late.length}</b><span>planejada vencida</span></div>
+      <div class="kpi ${blocked.length?'alert':''}"><small>Bloqueados</small><b>${blocked.length}</b><span>impedimento ativo</span></div>
+      <div class="kpi ${risk.length?'warn':''}"><small>Em risco</small><b>${risk.length}</b><span>atenção requerida</span></div>
+    </div>
+
+    <div class="dash-cols">
+      <div class="dash-card">
+        <h4>Distribuição por coluna</h4>
+        ${COLS.map(cl => { const n = cards.filter(c => c.coluna === cl.id).length; return `
+          <div class="dash-row"><span class="dash-lbl">${cl.nome}</span>${bar(n, colMax, 'var(--gold)')}<span class="mono dash-n">${n}</span></div>`}).join('')}
+      </div>
+      <div class="dash-card">
+        <h4>Distribuição por status</h4>
+        ${STATUS.map(s => { const n = cards.filter(c => c.status === s).length; return `
+          <div class="dash-row"><span class="dash-lbl">${s}</span>${bar(n, stMax, stColors[s])}<span class="mono dash-n">${n}</span></div>`}).join('')}
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <h4>Desempenho por tela</h4>
+      <table class="grid dash-table">
+        <thead><tr><th>Tela</th><th>Cards</th><th>Concluídos</th><th>Atrasados</th><th>Bloqueados</th><th>Farol vermelho</th><th style="width:220px">Conclusão</th></tr></thead>
+        <tbody>
+          ${S.telas.map(t => {
+            const tc = t.cards, td = tc.filter(isDone).length, tp = tc.length ? Math.round(td/tc.length*100) : 0;
+            const tl = tc.filter(isLate).length, tb = tc.filter(c=>c.status==='Bloqueado').length, tv = tc.filter(c=>c.farol==='vermelho').length;
+            return `<tr class="row" onclick="switchTela('${t.id}')">
+              <td class="td-title">${esc(t.nome)}</td>
+              <td class="mono">${tc.length}</td>
+              <td class="mono">${td}</td>
+              <td class="mono" style="${tl?'color:var(--vermelho);font-weight:600':''}">${tl}</td>
+              <td class="mono" style="${tb?'color:var(--vermelho);font-weight:600':''}">${tb}</td>
+              <td class="mono" style="${tv?'color:var(--vermelho);font-weight:600':''}">${tv}</td>
+              <td><span class="kr-prog"><span class="kr-bar"><i style="width:${tp}%"></i></span><span class="kr-pct">${tp}%</span></span></td>
+            </tr>`}).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dash-card">
+      <h4>Progresso dos OKRs</h4>
+      ${S.telas.filter(t => t.okrs.length).map(t => `
+        <div class="dash-okr-tela">
+          <div class="dash-okr-tela-name">${esc(t.nome)}</div>
+          ${t.okrs.map((o,i) => `
+            <div class="dash-okr-obj"><small>O${String(i+1).padStart(2,'0')}</small>${esc(o.objetivo)}</div>
+            ${o.krs.map((k,j) => { const p = krProgress(k.id, t); return `
+              <div class="dash-row"><span class="kr-key">KR${j+1}</span><span class="dash-lbl kr">${esc(k.texto)}</span>
+                <span class="kr-prog"><span class="kr-bar"><i style="width:${p?p.pct:0}%"></i></span><span class="kr-pct">${p ? p.pct+'%' : '—'}</span></span>
+              </div>`}).join('')}
+          `).join('')}
+        </div>`).join('') || '<div class="empty-note">Nenhum OKR cadastrado.</div>'}
+    </div>
+
+    <div class="dash-cols">
+      <div class="dash-card">
+        <h4>Atrasados <span class="mono dash-count">${lateSorted.length}</span></h4>
+        ${lateSorted.slice(0,10).map(evItem).join('') || '<div class="empty-note">Nenhum card atrasado.</div>'}
+      </div>
+      <div class="dash-card">
+        <h4>Vencem nos próximos 7 dias <span class="mono dash-count">${next7.length}</span></h4>
+        ${next7.slice(0,10).map(evItem).join('') || '<div class="empty-note">Nenhum vencimento na próxima semana.</div>'}
+      </div>
     </div>
   </div>`;
 }
@@ -752,8 +1057,12 @@ function modalShell(title, bodyHTML, footHTML){
 
 /* --- Card modal --- */
 let editingCardId = null;
+let modalTelaId = null;
 function openCardModal(id, preset){
-  const t = tela();
+  const owner = id ? telaOfCard(id) : (preset && preset.parentId) ? telaOfCard(preset.parentId) : null;
+  const t = owner || (isCtrl() || isDash() ? null : tela());
+  if(!t){ alertModal('Selecione uma tela para criar novos cards.'); return; }
+  modalTelaId = t.id;
   editingCardId = id || null;
   const c = id ? cardById(id) : Object.assign({
     titulo:'', descricao:'', raiaId:(t.raias[0]||{}).id||'', coluna:'fila',
@@ -762,7 +1071,7 @@ function openCardModal(id, preset){
   if(!t.raias.length){ alertModal('Crie uma raia antes de adicionar cards.'); return; }
   const parents = t.cards.filter(x => !x.parentId && x.id !== id);
   const krOptions = t.okrs.flatMap((o,i) => o.krs.map((k,j) => ({id:k.id, label:`O${i+1}·KR${j+1} — ${k.texto}`})));
-  modalShell(id ? 'Editar card' : 'Novo card', `
+  modalShell(id ? `Editar card${isCtrl()||isDash() ? ' — '+esc(t.nome) : ''}` : 'Novo card', `
     <div class="field"><label>Título da entrega</label><input id="f_titulo" value="${esc(c.titulo)}" placeholder="Ex.: Integração com WhatsApp"></div>
     <div class="field"><label>Descrição da entrega</label><textarea id="f_desc" placeholder="O que será entregue e qual o critério de pronto?">${esc(c.descricao)}</textarea></div>
     <div class="row3">
@@ -807,7 +1116,7 @@ function openCardModal(id, preset){
   });
 }
 function saveCard(){
-  const t = tela();
+  const t = S.telas.find(x => x.id === modalTelaId) || tela();
   const titulo = document.getElementById('f_titulo').value.trim();
   if(!titulo){ document.getElementById('f_titulo').focus(); return; }
   const data = {
@@ -833,7 +1142,7 @@ function saveCard(){
 function askDeleteCard(id){
   const kids = children(id).length;
   confirmDanger(`Excluir este card${kids ? ` e seus ${kids} card(s) filho(s)` : ''}? Esta ação não pode ser desfeita.`, () => {
-    const t = tela();
+    const t = telaOfCard(id) || tela();
     t.cards = t.cards.filter(c => c.id !== id && c.parentId !== id);
     closeModal(); commit();
   });

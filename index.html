@@ -296,6 +296,29 @@ table.grid tr.child-row td:first-child{padding-left:34px}
 .modal-foot{display:flex;gap:10px;padding:14px 22px;border-top:1px solid var(--line);justify-content:flex-end;background:var(--bg-soft)}
 .field label{display:block;font-size:.76rem;font-weight:600;color:var(--ink-soft);margin-bottom:5px;letter-spacing:.02em}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ---------- Date range picker (início – fim) ---------- */
+.drp-wrap{position:relative}
+.drp-wrap input{font-family:'IBM Plex Mono',monospace;font-size:.84rem}
+.drp-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:60;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-lg);width:266px;padding:10px;animation:pop .12s ease-out}
+.drp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.drp-title{font-size:.82rem;font-weight:600}
+.drp-nav{width:26px;height:26px;border-radius:6px;color:var(--ink-soft);font-size:1rem;line-height:1}
+.drp-nav:hover{background:var(--bg-soft);color:var(--ink)}
+.drp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.drp-dow span{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--ink-faint);text-align:center;padding:2px 0;font-weight:600}
+.drp-day{height:28px;border-radius:6px;font-size:.78rem;color:var(--ink);display:flex;align-items:center;justify-content:center}
+.drp-day:hover{background:var(--bg-soft)}
+.drp-day.off{pointer-events:none}
+.drp-day.today{outline:1px solid var(--gold);outline-offset:-1px}
+.drp-day.in{background:var(--gold-soft);border-radius:0}
+.drp-day.sel{background:var(--ink);color:#fff;font-weight:600}
+.drp-hint{font-size:.68rem;color:var(--ink-faint);margin-top:8px}
+.drp-foot{display:flex;gap:6px;justify-content:flex-end;margin-top:8px;border-top:1px solid var(--line-soft);padding-top:8px}
+.drp-act{font-size:.74rem;font-weight:600;color:var(--ink-soft);padding:4px 9px;border-radius:6px;border:1px solid var(--line)}
+.drp-act:hover{color:var(--ink);border-color:var(--ink-faint)}
+.drp-ok{background:var(--ink);color:#fff;border-color:var(--ink)}
+.drp-ok:hover{background:#1c3050;color:#fff}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .farol-picker{display:flex;gap:8px}
 .farol-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:.82rem;font-weight:600;color:var(--ink-soft)}
@@ -452,6 +475,7 @@ function commit(){ save(); render(); if(typeof scheduleCloud === 'function') sch
 /* ================= Helpers ================= */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => { if(!d) return '—'; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y.slice(2)}`; };
+const fmtPeriodo = c => (c.dataInicio && c.dataPlanejada) ? `${fmtDate(c.dataInicio)}–${fmtDate(c.dataPlanejada)}` : fmtDate(c.dataPlanejada);
 const isOut = c => c.coluna === 'descartado' || c.coluna === 'cancelado' || c.status === 'Descartado' || c.status === 'Cancelado';
 const isLate = c => c.dataPlanejada && !c.dataRealizada && c.status !== 'Concluído' && !isOut(c) && c.dataPlanejada < new Date().toISOString().slice(0,10);
 /* ---- Telas especiais: Controle Geral e Dashboard ---- */
@@ -750,7 +774,7 @@ function cardHTML(c){
     <div class="card-title">${esc(c.titulo)}</div>
     ${c.descricao ? `<div class="card-desc">${esc(c.descricao)}</div>` : ''}
     <div class="card-dates">
-      <span>Plan <b class="${isLate(c)?'late':''}">${fmtDate(c.dataPlanejada)}</b></span>
+      <span>Plan <b class="${isLate(c)?'late':''}">${fmtPeriodo(c)}</b></span>
       <span>Real <b>${fmtDate(c.dataRealizada)}</b></span>
     </div>
     ${kids.length ? `
@@ -914,7 +938,7 @@ function renderTabela(){
         <td>${colName(c.coluna)}</td>
         <td><span class="farol-cell"><span class="farol ${c.farol}"></span>${c.farol}</span></td>
         <td><span class="chip ${statusClass(c.status)}">${esc(c.status)}</span></td>
-        <td class="mono ${isLate(c)?'late':''}" style="${isLate(c)?'color:var(--vermelho);font-weight:600':''}">${fmtDate(c.dataPlanejada)}</td>
+        <td class="mono ${isLate(c)?'late':''}" style="${isLate(c)?'color:var(--vermelho);font-weight:600':''}">${fmtPeriodo(c)}</td>
         <td class="mono">${fmtDate(c.dataRealizada)}</td>
       </tr>`).join('')}
     </tbody>
@@ -1082,7 +1106,7 @@ function renderDashboard(){
 
 /* ================= Modais ================= */
 const modalRoot = document.getElementById('modalRoot');
-function closeModal(){ modalRoot.innerHTML = ''; }
+function closeModal(){ if(typeof drpClose === 'function') drpClose(); modalRoot.innerHTML = ''; }
 function modalShell(title, bodyHTML, footHTML){
   modalRoot.innerHTML = `<div class="overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal" role="dialog" aria-modal="true">
@@ -1091,6 +1115,130 @@ function modalShell(title, bodyHTML, footHTML){
       <div class="modal-foot">${footHTML}</div>
     </div></div>`;
 }
+
+/* ================= Período planejado — date range picker ================= */
+const DRP_MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let drp = null;
+
+const drpISO = (y,m,d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const drpFull = iso => { if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+function drpValid(y,m,d){
+  const dt = new Date(y,m,d);
+  return (dt.getFullYear()===y && dt.getMonth()===m && dt.getDate()===d) ? drpISO(y,m,d) : null;
+}
+function drpParseOne(tok){
+  let m = tok.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m) return drpValid(+m[1], +m[2]-1, +m[3]);
+  m = tok.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(m){ let y = +m[3]; if(y < 100) y += 2000; return drpValid(y, +m[2]-1, +m[1]); }
+  return null;
+}
+/* Aceita: "dd/mm/aaaa – dd/mm/aaaa", "dd/mm/aa - dd/mm/aa", datas ISO, ou uma data única (= fim). */
+function drpParseText(text){
+  const toks = String(text || '').match(/\d{4}-\d{1,2}-\d{1,2}|\d{1,2}\/\d{1,2}\/\d{2,4}/g) || [];
+  const dates = toks.map(drpParseOne).filter(Boolean).sort();
+  if(!dates.length) return {ini:'', fim:''};
+  if(dates.length === 1) return {ini:'', fim:dates[0]};
+  return {ini:dates[0], fim:dates[dates.length-1]};
+}
+const drpText = (ini, fim) => (ini && fim) ? `${drpFull(ini)} – ${drpFull(fim)}` : (fim ? drpFull(fim) : (ini ? `${drpFull(ini)} – ` : ''));
+
+function drpOpen(inputId){
+  const inp = document.getElementById(inputId); if(!inp) return;
+  if(drp && drp.inputId === inputId && document.getElementById('drp-pop')) return;
+  const cur = drpParseText(inp.value);
+  const ref = cur.ini || cur.fim || new Date().toISOString().slice(0,10);
+  drp = {inputId, ini:cur.ini, fim:cur.fim, picking:false, viewY:+ref.slice(0,4), viewM:+ref.slice(5,7)-1, hover:''};
+  drpRender();
+}
+function drpClose(){
+  const pop = document.getElementById('drp-pop'); if(pop) pop.remove();
+  drp = null;
+}
+function drpNav(step){
+  if(!drp) return;
+  drp.viewM += step;
+  while(drp.viewM < 0){ drp.viewM += 12; drp.viewY--; }
+  while(drp.viewM > 11){ drp.viewM -= 12; drp.viewY++; }
+  drpRender();
+}
+function drpSyncInput(){
+  const inp = document.getElementById(drp.inputId);
+  if(inp) inp.value = drpText(drp.ini, drp.fim);
+}
+function drpFromInput(inputId){
+  if(!drp || drp.inputId !== inputId) return;
+  const cur = drpParseText(document.getElementById(inputId).value);
+  drp.ini = cur.ini; drp.fim = cur.fim; drp.picking = false; drp.hover = '';
+  const ref = cur.ini || cur.fim;
+  if(ref){ drp.viewY = +ref.slice(0,4); drp.viewM = +ref.slice(5,7)-1; }
+  drpRender();
+}
+function drpNormalizeInput(inp){
+  const cur = drpParseText(inp.value);
+  inp.value = drpText(cur.ini, cur.fim);
+}
+function drpPick(iso){
+  if(!drp) return;
+  if(!drp.picking){ drp.ini = iso; drp.fim = ''; drp.picking = true; }
+  else if(iso < drp.ini){ drp.ini = iso; }
+  else { drp.fim = iso; drp.picking = false; }
+  drpSyncInput();
+  if(!drp.picking && drp.fim) drpClose(); else drpRender();
+}
+function drpHover(iso){ if(drp && drp.picking && drp.hover !== iso){ drp.hover = iso; drpRender(); } }
+function drpToday(){
+  if(!drp) return;
+  drp.ini = ''; drp.fim = new Date().toISOString().slice(0,10); drp.picking = false;
+  drpSyncInput(); drpClose();
+}
+function drpClear(){
+  if(!drp) return;
+  drp.ini = ''; drp.fim = ''; drp.picking = false; drp.hover = '';
+  drpSyncInput(); drpRender();
+}
+function drpRender(){
+  if(!drp) return;
+  const inp = document.getElementById(drp.inputId);
+  const wrap = inp ? inp.closest('.drp-wrap') : null;
+  if(!wrap){ drpClose(); return; }
+  let pop = document.getElementById('drp-pop');
+  if(!pop){ pop = document.createElement('div'); pop.id = 'drp-pop'; pop.className = 'drp-pop'; wrap.appendChild(pop); }
+  const y = drp.viewY, m = drp.viewM;
+  const first = new Date(y, m, 1).getDay();
+  const nDays = new Date(y, m+1, 0).getDate();
+  const today = new Date().toISOString().slice(0,10);
+  const selB = drp.fim || (drp.picking ? drp.hover : '');
+  const lo = (drp.ini && selB) ? (drp.ini < selB ? drp.ini : selB) : '';
+  const hi = (drp.ini && selB) ? (drp.ini < selB ? selB : drp.ini) : '';
+  let cells = '';
+  for(let i = 0; i < first; i++) cells += '<span class="drp-day off"></span>';
+  for(let d = 1; d <= nDays; d++){
+    const iso = drpISO(y, m, d);
+    const cls = ['drp-day'];
+    if(iso === today) cls.push('today');
+    if(iso === drp.ini || iso === drp.fim) cls.push('sel');
+    else if(lo && iso > lo && iso <= hi) cls.push('in');
+    cells += `<button type="button" class="${cls.join(' ')}" onmousedown="event.preventDefault()" onclick="drpPick('${iso}')" onmouseenter="drpHover('${iso}')">${d}</button>`;
+  }
+  pop.innerHTML = `
+    <div class="drp-head">
+      <button type="button" class="drp-nav" onmousedown="event.preventDefault()" onclick="drpNav(-1)">‹</button>
+      <span class="drp-title">${DRP_MESES[m]} ${y}</span>
+      <button type="button" class="drp-nav" onmousedown="event.preventDefault()" onclick="drpNav(1)">›</button>
+    </div>
+    <div class="drp-grid drp-dow">${['D','S','T','Q','Q','S','S'].map(x => `<span>${x}</span>`).join('')}</div>
+    <div class="drp-grid">${cells}</div>
+    <div class="drp-hint">${drp.picking ? 'Agora selecione a data fim' : 'Clique no início e depois no fim — ou digite no campo'}</div>
+    <div class="drp-foot">
+      <button type="button" class="drp-act" onmousedown="event.preventDefault()" onclick="drpClear()">Limpar</button>
+      <button type="button" class="drp-act" onmousedown="event.preventDefault()" onclick="drpToday()">Hoje</button>
+      <button type="button" class="drp-act drp-ok" onmousedown="event.preventDefault()" onclick="drpClose()">OK</button>
+    </div>`;
+}
+document.addEventListener('mousedown', e => {
+  if(drp && !e.target.closest('.drp-wrap')) drpClose();
+});
 
 /* --- Card modal --- */
 let editingCardId = null;
@@ -1103,7 +1251,7 @@ function openCardModal(id, preset){
   editingCardId = id || null;
   const c = id ? cardById(id) : Object.assign({
     titulo:'', descricao:'', raiaId:(t.raias[0]||{}).id||'', coluna:'fila',
-    farol:'verde', status:'No prazo', dataPlanejada:'', dataRealizada:'', parentId:null, krId:null
+    farol:'verde', status:'No prazo', dataInicio:'', dataPlanejada:'', dataRealizada:'', parentId:null, krId:null
   }, preset || {});
   if(!t.raias.length){ alertModal('Crie uma raia antes de adicionar cards.'); return; }
   const parents = t.cards.filter(x => !x.parentId && x.id !== id);
@@ -1122,7 +1270,15 @@ function openCardModal(id, preset){
       </div>
     </div>
     <div class="row2">
-      <div class="field"><label>Data planejada</label><input type="date" id="f_plan" value="${c.dataPlanejada||''}"></div>
+      <div class="field"><label>Período planejado (início – fim)</label>
+        <div class="drp-wrap">
+          <input id="f_plan" autocomplete="off" spellcheck="false" placeholder="dd/mm/aaaa – dd/mm/aaaa"
+            value="${drpText(c.dataInicio||'', c.dataPlanejada||'')}"
+            onfocus="drpOpen('f_plan')" onclick="drpOpen('f_plan')"
+            oninput="drpFromInput('f_plan')" onchange="drpNormalizeInput(this)"
+            onkeydown="if(event.key==='Escape'){drpClose();} if(event.key==='Enter'){event.preventDefault();drpNormalizeInput(this);drpClose();}">
+        </div>
+      </div>
       <div class="field"><label>Data realizada</label><input type="date" id="f_real" value="${c.dataRealizada||''}"></div>
     </div>
     <div class="row2">
@@ -1163,7 +1319,8 @@ function saveCard(){
     coluna: document.getElementById('f_col').value,
     status: document.getElementById('f_status').value,
     farol: (document.querySelector('#f_farol .farol-opt.sel')||{dataset:{f:'verde'}}).dataset.f,
-    dataPlanejada: document.getElementById('f_plan').value,
+    dataInicio: drpParseText(document.getElementById('f_plan').value).ini,
+    dataPlanejada: drpParseText(document.getElementById('f_plan').value).fim,
     dataRealizada: document.getElementById('f_real').value,
     parentId: document.getElementById('f_pai').value || null,
     krId: document.getElementById('f_kr').value || null
